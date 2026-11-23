@@ -58,7 +58,8 @@ def coletar():
             lance = det.get("currentMaxBid") if tem_lance else (det.get("initialBidValue") or o.get("price"))
             # Em leilão judicial a 1ª praça costuma ser o valor de avaliação.
             estagios = ((auc.get("eventPipeline") or {}).get("stages") or [])
-            avaliacao = estagios[0].get("initialBidValue") if judicial and len(estagios) > 1 else None
+            ativo = next((i for i, e in enumerate(estagios) if e.get("isActive")), 0)
+            avaliacao = estagios[0].get("initialBidValue") if judicial and ativo > 0 else None
             fim = o.get("endDate")
             try:
                 encerra = iso_brt(datetime.strptime(fim, "%Y-%m-%d %H:%M:%S")) if fim else None
