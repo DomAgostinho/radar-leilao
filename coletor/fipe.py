@@ -132,25 +132,29 @@ class Fipe:
         if not tt:
             return None
         base = tt[0]
-        melhor, nota_m = None, 0
+        notas = []
         for m in modelos:
             mt = self.tokens(self._nome(m))
             if base not in mt:
                 continue
-            nota = 3 + sum(1 for w in tt[1:6] if w in mt) - 0.05 * len(mt)
-            if nota > nota_m:
-                melhor, nota_m = m, nota
-        if not melhor:
-            return None
-        mcod = self._cod(melhor)
-        anos = self._cacheado("anos", f"{bcod}/{mcod}", f"/brands/{bcod}/models/{mcod}/years") or []
+            notas.append((3 + sum(1 for w in tt[1:6] if any(w == x or (len(w) >= 3 and len(x) >= 3 and (x.startswith(w) or w.startswith(x))) for x in mt)) - 0.05 * len(mt), m))
+        # empate: carro mais novo tende a estar nos códigos FIPE mais altos
+        novo = int(ano) >= 2008
+        notas.sort(key=lambda x: (-round(x[0], 1), -int(self._cod(x[1])) if novo else int(self._cod(x[1]))))
         diesel = "diesel" in sem_acento(titulo)
-        opcoes = [a for a in anos if self._cod(a).startswith(f"{ano}-")]
-        if not opcoes:
-            return None
-        opcoes.sort(key=lambda a: 0 if self._cod(a).endswith("-3") == diesel else 1)
-        ycod = self._cod(opcoes[0])
-        return f"{bcod}/{mcod}/{ycod}"
+        # tenta as versões mais parecidas até achar uma que exista no ano do carro
+        for nota, m in notas[:6]:
+            if nota < notas[0][0] - 2:
+                break
+            mcod = self._cod(m)
+            anos = self._cacheado("anos", f"{bcod}/{mcod}", f"/brands/{bcod}/models/{mcod}/years") or []
+            opcoes = [a for a in anos if self._cod(a).startswith(f"{ano}-")]
+            if opcoes:
+                opcoes.sort(key=lambda a: 0 if self._cod(a).endswith("-3") == diesel else 1)
+                return f"{bcod}/{mcod}/{self._cod(opcoes[0])}"
+            if self.parou:
+                return None
+        return None
 
     def preco(self, chave):
         p = self._cacheado("precos", chave, "/brands/{}/models/{}/years/{}".format(*chave.split("/")))
