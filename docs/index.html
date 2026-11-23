@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de Leilão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f3f5f9,#0d1424);--card:light-dark(#fff,#16203a);--ink:light-dark(#0f1729,#e8edf7);--mute:light-dark(#5a6680,#9aa7c2);--line:light-dark(#d9dfea,#2a3758);--blue:#0b3ea8;--blue2:light-dark(#0b3ea8,#6b97ff);--ok:light-dark(#0f8a4b,#3ccf83);--warn:light-dark(#b97800,#f2b632);--bad:light-dark(#c62f2f,#ff6b6b);--field:light-dark(#fff,#0f1830)}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.big{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0}
+header{background:var(--blue);color:#fff;padding:16px max(4vw,14px) 0}
+header h1{font-size:clamp(30px,6vw,42px)}
+header p{margin:4px 0 12px;opacity:.9;font-size:14px}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:transparent;color:#fff;border:0;border-bottom:4px solid transparent;font:600 16px Barlow,sans-serif;padding:10px 14px;min-height:44px;cursor:pointer;white-space:nowrap;opacity:.8}
+nav button.on{border-color:#fff;opacity:1}
+main{max-width:1240px;margin:0 auto;padding:16px max(3vw,12px) 60px}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:0 14px;min-height:40px;font:600 15px Barlow,sans-serif;cursor:pointer}
+.chip.on{background:var(--blue2);border-color:var(--blue2);color:light-dark(#fff,#0d1424)}
+input,select{font:16px Barlow,sans-serif;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-height:42px}
+.grid-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.grid-f label{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:600;color:var(--mute)}
+.info{color:var(--mute);font-size:14px;margin:0 0 12px}
+.dia{margin:22px 0 10px;font-size:24px;display:flex;align-items:baseline;gap:10px}
+.dia small{font:500 15px Barlow,sans-serif;color:var(--mute)}
+.lots{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.lot{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.lot .foto{min-height:44px;background:light-dark(#e6eaf2,#1d2845) center/cover no-repeat;position:relative}
+.lot .foto.tem{aspect-ratio:16/9}.lot .foto .tag{position:absolute;left:8px;top:8px;display:flex;gap:4px;flex-wrap:wrap}
+.b{font:700 12px Barlow,sans-serif;padding:3px 8px;border-radius:6px;background:#fff;color:#0f1729;white-space:nowrap}
+.b.fin{background:#0b3ea8;color:#fff}.b.peq{background:#0f8a4b;color:#fff}.b.med{background:#f2b632;color:#1b1300}.b.gra{background:#c62f2f;color:#fff}.b.jud{background:#5b2a86;color:#fff}
+.lot .c{padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px;flex:1}
+.lot h3{font-size:20px}
+.meta{font-size:14px;color:var(--mute)}
+.preco{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-top:auto;padding-top:6px}
+.preco b{font:700 24px "Barlow Condensed",sans-serif;white-space:nowrap}
+.desc{font:700 18px "Barlow Condensed",sans-serif;padding:2px 8px;border-radius:999px;color:#fff;background:var(--ok);white-space:nowrap}
+.desc.w{background:var(--warn);color:#1b1300}.desc.x{background:var(--mute)}
+.acoes{display:flex;gap:6px;margin-top:6px}
+.acoes a,.acoes button{flex:1;text-align:center;text-decoration:none;font:600 15px Barlow,sans-serif;min-height:40px;display:flex;align-items:center;justify-content:center;border-radius:9px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.acoes a{background:var(--blue);border-color:var(--blue);color:#fff}
+.acoes .fav.on{color:#c58a00;border-color:#c58a00}
+.mais{display:block;margin:18px auto;min-height:44px;padding:0 22px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 16px Barlow,sans-serif;cursor:pointer}
+.vazio{padding:28px;text-align:center;color:var(--mute);border:2px dashed var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden}
+td,th{padding:10px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
+th{color:var(--mute);font-weight:600}
+.ok{color:var(--ok);font-weight:600}.er{color:var(--bad);font-weight:600}
+dialog{border:0;border-radius:14px;padding:0;max-width:520px;width:calc(100% - 24px);background:var(--card);color:var(--ink)}
+dialog::backdrop{background:rgba(5,10,25,.55)}
+.dlg{padding:18px}
+.dlg h2{font-size:26px;margin-bottom:10px}
+.dlg .grid-f{grid-template-columns:repeat(2,minmax(0,1fr))}
+.res{border-radius:10px;padding:12px;color:#fff;margin:6px 0 10px}
+.res.ok{background:var(--ok)}.res.w{background:var(--warn);color:#1b1300}.res.x{background:var(--bad)}
+.res .big{font-size:42px}
+.lin{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--line);font-size:15px}
+.lin span:last-child{font-weight:600;white-space:nowrap}
+.fechar{width:100%;min-height:44px;margin-top:12px;border-radius:10px;border:0;background:var(--blue);color:#fff;font:600 16px Barlow,sans-serif;cursor:pointer}
+footer{color:var(--mute);font-size:13px;margin-top:30px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--blue2);outline-offset:1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Radar de Leilão</h1>
+  <p id="atual">Carregando lotes…</p>
+  <nav>
+    <button data-aba="semana" class="on">Semana</button>
+    <button data-aba="buscar">Buscar</button>
+    <button data-aba="favoritos">Favoritos</button>
+    <button data-aba="fontes">Leiloeiros</button>
+  </nav>
+</header>
+<main>
+  <section id="semana">
+    <div class="filtros" id="fSemana"></div>
+    <p class="info">Carros de financeira e de pequena monta que encerram nos próximos 7 dias, separados por dia.</p>
+    <div id="listaSemana"></div>
+  </section>
+
+  <section id="buscar" hidden>
+    <div class="grid-f">
+      <label>Carro<input id="q" type="search" placeholder="Ex.: onix, compass"></label>
+      <label>Origem<select id="fOrigem"><option value="">Todas</option><option value="financeira">Financeira</option><option value="seguradora">Seguradora</option><option value="locadora">Locadora</option><option value="judicial">Judicial</option><option value="apreensao">Apreensão</option><option value="outros">Outros</option></select></label>
+      <label>Sinistro<select id="fMonta"><option value="">Qualquer</option><option value="nao">Sem sinistro informado</option><option value="pequena">Pequena monta</option><option value="media">Média monta</option><option value="sinistro">Sinistro sem detalhe</option><option value="grande">Grande monta/sucata</option></select></label>
+      <label>Tipo<select id="fCat"><option value="carro">Carros e picapes</option><option value="moto">Motos</option><option value="pesado">Pesados</option><option value="">Todos</option></select></label>
+      <label>Lance até (R$)<input id="fMax" inputmode="numeric" placeholder="Ex.: 50000"></label>
+      <label>Ano a partir de<input id="fAno" inputmode="numeric" placeholder="Ex.: 2018"></label>
+      <label>Leiloeiro<select id="fLei"><option value="">Todos</option></select></label>
+      <label>Ordenar<select id="fOrd"><option value="enc">Encerra primeiro</option><option value="desc">Maior desconto</option><option value="barato">Menor lance</option><option value="ano">Ano mais novo</option></select></label>
+    </div>
+    <div class="filtros" id="fUf"></div>
+    <p class="info" id="contagem"></p>
+    <div class="lots" id="listaBusca"></div>
+    <button class="mais" id="mais" hidden>Mostrar mais</button>
+  </section>
+
+  <section id="favoritos" hidden>
+    <p class="info">Os carros que você marcou com ☆ ficam salvos neste aparelho.</p>
+    <div class="lots" id="listaFav"></div>
+  </section>
+
+  <section id="fontes" hidden>
+    <p class="info">Os robôs passam pelos sites a cada 3 horas. Se um leiloeiro der erro, os carros da última coleta boa continuam aparecendo.</p>
+    <table><thead><tr><th>Leiloeiro</th><th>Carros</th><th>Situação</th></tr></thead><tbody id="tabFontes"></tbody></table>
+  </section>
+
+  <footer>Os valores são estimativas tiradas dos sites dos leiloeiros. Comissão, taxas e condições seguem o edital de cada leilão: confira tudo antes de dar o lance. Este site não é leiloeiro e não envia lances.</footer>
+</main>
+
+<dialog id="dlg"><div class="dlg">
+  <h2 id="dTit">Calcular</h2>
+  <div class="grid-f">
+    <label>FIPE ou avaliação (R$)<input id="cFipe" inputmode="numeric"></label>
+    <label>Lance (R$)<input id="cLance" inputmode="numeric"></label>
+    <label>Comissão (%)<input id="cCom" inputmode="decimal" value="5"></label>
+    <label>Taxas e pátio (R$)<input id="cTaxa" inputmode="numeric" value="1500"></label>
+    <label>Despachante (R$)<input id="cDesp" inputmode="numeric" value="900"></label>
+    <label>Reparos (R$)<input id="cRep" inputmode="numeric" value="0"></label>
+  </div>
+  <div class="res" id="cRes"></div>
+  <div id="cLin"></div>
+  <button class="fechar" id="dFechar">Fechar</button>
+</div></dialog>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const UFS=['PR','SC','RS','SP','MG','RJ','ES'];
+const NOMES={financeira:'Financeira',seguradora:'Seguradora',locadora:'Locadora',judicial:'Judicial',apreensao:'Apreensão',outros:'Outros'};
+const MONTA={pequena:['Pequena monta','peq'],media:['Média monta','med'],grande:['Grande monta','gra'],sinistro:['Sinistro','med'],sem:['Sem sinistro','']};
+const brl=v=>v?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}):'–';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=s=>{s=String(s||'').replace(/[^\d,]/g,'').replace(',','.');return parseFloat(s)||0};
+const ls={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let LOTES=[],porId={},favs=ls.get('radar.favs',{}),ufSel=new Set(ls.get('radar.ufs',UFS)),semFin=true,semPeq=true,pagina=60;
+
+function quando(iso){if(!iso)return'data no edital';const d=new Date(iso);const h=(d-Date.now())/36e5;
+  const txt=d.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'2-digit'})+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  return h<0?'encerrado · '+txt:h<24?`encerra em ${Math.max(1,Math.round(h))} h · `+txt:txt}
+function descPct(l){return l.avaliacao&&l.lance?Math.round((1-l.lance/l.avaliacao)*100):null}
+
+function card(l){
+  const d=descPct(l),fav=!!favs[l.id];
+  const bs=[];if(l.origem==='financeira')bs.push('<span class="b fin">Financeira</span>');else if(l.origem==='judicial')bs.push('<span class="b jud">Judicial</span>');else if(l.origem)bs.push(`<span class="b">${NOMES[l.origem]||esc(l.origem)}</span>`);
+  if(l.monta&&MONTA[l.monta]&&l.monta!=='sem')bs.push(`<span class="b ${MONTA[l.monta][1]}">${MONTA[l.monta][0]}</span>`);
+  return `<article class="lot">
+  <div class="foto${l.foto?' tem':''}" style="${l.foto?`background-image:url('${esc(l.foto)}')`:''}"><div class="tag">${bs.join('')}</div></div>
+  <div class="c">
+    <h3>${esc(l.titulo)}${l.ano?' '+l.ano:''}</h3>
+    <div class="meta">${esc([l.cidade,l.uf].filter(Boolean).join('/'))} · ${esc(l.leiloeiro)}</div>
+    <div class="meta">${quando(l.encerra)}</div>
+    ${l.obs?`<div class="meta">${esc(l.obs)}</div>`:''}
+    <div class="preco"><div><span class="meta">${l.lance_tipo==='inicial'?'Lance inicial':l.lance_tipo==='sem lance'?'Sem lance ainda':'Lance atual'}</span><br><b>${brl(l.lance)}</b><br><span class="meta">${l.avaliacao?'Avaliação '+brl(l.avaliacao):'Avaliação no edital'}</span></div>
+    ${d!==null?`<span class="desc ${d>=40?'':d>=20?'w':'x'}">-${d}%</span>`:''}</div>
+    <div class="acoes"><a href="${esc(l.link)}" target="_blank" rel="noopener">Ver lote</a><button data-calc="${esc(l.id)}">Calcular</button><button class="fav ${fav?'on':''}" data-fav="${esc(l.id)}" aria-label="Favoritar">${fav?'★':'☆'}</button></div>
+  </div></article>`}
+
+function chipsUf(el,onChange){el.innerHTML=UFS.map(u=>`<button class="chip ${ufSel.has(u)?'on':''}" data-uf="${u}">${u}</button>`).join('');
+  el.onclick=e=>{const b=e.target.closest('[data-uf]');if(!b)return;const u=b.dataset.uf;ufSel.has(u)?ufSel.delete(u):ufSel.add(u);if(!ufSel.size)UFS.forEach(x=>ufSel.add(x));ls.set('radar.ufs',[...ufSel]);renderTudo()}}
+
+function renderSemana(){
+  const f=$('fSemana');
+  f.innerHTML=`<button class="chip ${semFin?'on':''}" data-s="fin">Financeira</button><button class="chip ${semPeq?'on':''}" data-s="peq">Pequena monta</button><span style="width:8px"></span>`+UFS.map(u=>`<button class="chip ${ufSel.has(u)?'on':''}" data-uf="${u}">${u}</button>`).join('');
+  const ini=Date.now()-3*36e5,fim=Date.now()+7*864e5;
+  const lista=LOTES.filter(l=>l.categoria==='carro'&&ufSel.has(l.uf)&&l.encerra&&+new Date(l.encerra)>=ini&&+new Date(l.encerra)<=fim&&((semFin&&l.origem==='financeira'&&!['media','grande'].includes(l.monta))||(semPeq&&l.monta==='pequena')));
+  lista.sort((a,b)=>a.encerra.localeCompare(b.encerra));const dias={};lista.forEach(l=>{const k=new Date(l.encerra).toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit'});(dias[k]=dias[k]||[]).push(l)});
+  $('listaSemana').innerHTML=Object.keys(dias).length?Object.entries(dias).map(([k,v])=>`<h2 class="dia">${k[0].toUpperCase()+k.slice(1)}<small>${v.length} carro${v.length>1?'s':''}</small></h2><div class="lots">${v.map(card).join('')}</div>`).join(''):'<div class="vazio">Nenhum carro com esses filtros nos próximos 7 dias.</div>';
+}
+$('fSemana').addEventListener('click',e=>{const s=e.target.closest('[data-s]');if(s){s.dataset.s==='fin'?semFin=!semFin:semPeq=!semPeq;renderSemana();return}
+  const b=e.target.closest('[data-uf]');if(!b)return;const u=b.dataset.uf;ufSel.has(u)?ufSel.delete(u):ufSel.add(u);if(!ufSel.size)UFS.forEach(x=>ufSel.add(x));ls.set('radar.ufs',[...ufSel]);renderTudo()});
+
+function filtrados(){
+  const q=$('q').value.trim().toLowerCase().split(/\s+/).filter(Boolean),o=$('fOrigem').value,m=$('fMonta').value,c=$('fCat').value,mx=num($('fMax').value),an=num($('fAno').value),le=$('fLei').value;
+  let r=LOTES.filter(l=>ufSel.has(l.uf)&&(!c||l.categoria===c)&&(!o||l.origem===o)&&(!le||l.leiloeiro===le)&&(!mx||(l.lance||0)<=mx)&&(!an||(l.ano||0)>=an)
+    &&(!m||(m==='nao'?(!l.monta||l.monta==='sem'):l.monta===m))&&q.every(w=>(l.titulo+' '+l.cidade+' '+l.leiloeiro).toLowerCase().includes(w)));
+  const ord=$('fOrd').value;
+  r.sort((a,b)=>ord==='desc'?(descPct(b)??-1)-(descPct(a)??-1):ord==='barato'?(a.lance||1e12)-(b.lance||1e12):ord==='ano'?(b.ano||0)-(a.ano||0):String(a.encerra||'9').localeCompare(String(b.encerra||'9')));
+  return r}
+function renderBusca(){chipsUf($('fUf'));const r=filtrados();$('contagem').textContent=`${r.length.toLocaleString('pt-BR')} lotes encontrados`;
+  $('listaBusca').innerHTML=r.length?r.slice(0,pagina).map(card).join(''):'<div class="vazio">Nenhum lote com esses filtros.</div>';$('mais').hidden=r.length<=pagina}
+['q','fOrigem','fMonta','fCat','fMax','fAno','fLei','fOrd'].forEach(id=>$(id).addEventListener('input',()=>{pagina=60;renderBusca()}));
+$('mais').onclick=()=>{pagina+=60;renderBusca()};
+
+function renderFav(){const v=Object.values(favs).map(f=>porId[f.id]||Object.assign({},f,{obs:'Lote saiu da lista (pode ter encerrado)'}));
+  $('listaFav').innerHTML=v.length?v.map(card).join(''):'<div class="vazio">Nenhum favorito ainda. Toque na ☆ de um carro para guardar aqui.</div>'}
+
+function renderTudo(){renderSemana();renderBusca();renderFav()}
+
+document.body.addEventListener('click',e=>{
+  const f=e.target.closest('[data-fav]');if(f){const id=f.dataset.fav;if(favs[id])delete favs[id];else if(porId[id])favs[id]=porId[id];ls.set('radar.favs',favs);renderTudo();return}
+  const c=e.target.closest('[data-calc]');if(c){abrirCalc(porId[c.dataset.calc]||favs[c.dataset.calc]);return}});
+document.querySelector('nav').onclick=e=>{const b=e.target.closest('[data-aba]');if(!b)return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));['semana','buscar','favoritos','fontes'].forEach(id=>$(id).hidden=id!==b.dataset.aba);location.hash=b.dataset.aba};
+
+function abrirCalc(l){if(!l)return;$('dTit').textContent=(l.titulo||'')+(l.ano?' '+l.ano:'');$('cFipe').value=l.avaliacao?Math.round(l.avaliacao):'';$('cLance').value=l.lance?Math.round(l.lance):'';calc();$('dlg').showModal()}
+function calc(){const F=num($('cFipe').value),L=num($('cLance').value),c=num($('cCom').value)/100,fix=num($('cTaxa').value)+num($('cDesp').value),rep=num($('cRep').value);
+  const tot=L*(1+c)+fix+rep,p=F?tot/F*100:0,max=v=>F?Math.max(0,(v/100*F-fix-rep)/(1+c)):0;
+  const cl=!F||!L?'':p<=70?'ok':p<=85?'w':'x';
+  $('cRes').className='res '+cl;$('cRes').innerHTML=F&&L?`<div class="big">${Math.round(p)}% da FIPE</div>${cl==='ok'?'Vale a pena: bom desconto com todos os custos.':cl==='w'?'No limite: só se o carro estiver muito bom.':'Não compensa: fica perto do preço de mercado.'}`:'Preencha a FIPE e o lance.';
+  $('cLin').innerHTML=[['Lance',brl(L)],['Comissão',brl(L*c)],['Taxas e despachante',brl(fix)],['Reparos',brl(rep)],['<b>Custo total</b>','<b>'+brl(tot)+'</b>'],['Economia vs FIPE',brl(F-tot)],['Lance máximo para ficar verde (70%)',brl(max(70))]].map(([a,b])=>`<div class="lin"><span>${a}</span><span>${b}</span></div>`).join('')}
+['cFipe','cLance','cCom','cTaxa','cDesp','cRep'].forEach(id=>$(id).addEventListener('input',calc));
+$('dFechar').onclick=()=>$('dlg').close();
+
+Promise.all([fetch('dados/lotes.json',{cache:'no-cache'}).then(r=>r.json()),fetch('dados/status.json',{cache:'no-cache'}).then(r=>r.json()).catch(()=>({fontes:{}}))]).then(([d,s])=>{
+  LOTES=d.lotes||[];LOTES.forEach(l=>porId[l.id]=l);
+  const at=new Date(d.atualizado);$('atual').textContent=`${LOTES.length.toLocaleString('pt-BR')} lotes no Sul e Sudeste · atualizado ${at.toLocaleDateString('pt-BR')} às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  const leis=[...new Set(LOTES.map(l=>l.leiloeiro))].sort();$('fLei').innerHTML='<option value="">Todos</option>'+leis.map(x=>`<option>${esc(x)}</option>`).join('');
+  $('tabFontes').innerHTML=Object.values(s.fontes||{}).map(f=>`<tr><td>${esc(f.nome)}</td><td>${f.qtd??'–'}</td><td>${f.ok?'<span class="ok">OK</span>':`<span class="er">Erro</span><br><span class="meta">${esc(f.erro||'')}</span>`}</td></tr>`).join('');
+  renderTudo();
+  const h=location.hash.slice(1);if(h){const b=document.querySelector(`nav [data-aba="${h}"]`);if(b)b.click()}
+}).catch(()=>{$('atual').textContent='Ainda não há dados. Os robôs rodam a cada 3 horas.'});
+}
+</script>
+</body>
+</html>
