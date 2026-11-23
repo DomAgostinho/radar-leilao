@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b3ea8">
+<meta name="referrer" content="no-referrer">
 <title>Radar de Leilão</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -201,7 +202,7 @@ function card(l){
   <div class="sub">${esc(l.cidade||'')}${l.uf?'/'+l.uf:''} · ${esc(l.leiloeiro)}</div>
   <div class="sub">${l.encerra?'Encerra '+dataCurta(l.encerra):'Data no edital'}</div>
   <div class="tags">${tg.join('')}</div>
-  <div class="vl"><span><small>${l.lance_tipo==='inicial'?'Lance inicial':l.lance_tipo==='sem lance'?'Sem lance':'Lance atual'}</small><b>${brl(l.lance)}</b><small>${l.fipe?'FIPE '+mil(l.fipe):l.avaliacao?'Avaliação '+mil(l.avaliacao):'FIPE ainda não encontrada'}</small></span>
+  <div class="vl"><span><small>${!l.lance?'Sem lance ainda':l.lance_tipo==='inicial'?'Lance inicial':'Lance atual'}</small><b>${l.lance?brl(l.lance):'Ver no site'}</b><small>${l.fipe?'FIPE '+mil(l.fipe):l.avaliacao?'Avaliação '+mil(l.avaliacao):'FIPE ainda não encontrada'}</small></span>
   ${d===null?'':d>85?'<span class="pct baixo">lance ainda baixo</span>':`<span class="pct ${d>=40?'':d>=20?'w':'x'}">-${d}%</span>`}</div></span></button>`}
 
 function chipsAtivos(){
