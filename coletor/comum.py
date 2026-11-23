@@ -20,6 +20,18 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
 
 
+class Bloqueado(Exception):
+    pass
+
+
+def checar(r):
+    """Avisa quando o site bloqueou o robô (ex.: Cloudflare), em vez de devolver 0 carros calado."""
+    if r.status_code in (401, 403, 429, 503):
+        raise Bloqueado(f"site bloqueou o robô (HTTP {r.status_code}, {r.headers.get('server', '?')})")
+    r.raise_for_status()
+    return r
+
+
 def sessao():
     s = requests.Session()
     s.headers.update({
@@ -89,17 +101,21 @@ def categoria(titulo, extra=""):
     return "carro"
 
 
+BANCOS = (r"aymore|safra|bradesco|itau|santander|daycoval|votorantim|creditas|omni|pan s\.?a|banco pan|\bbv\b|"
+          r"banco (?:do brasil|volkswagen|toyota|honda|gm|fiat|mercedes|bmw|rci|psa|cnh|c6|inter|bari|j safra|original|sicredi|sicoob|stellantis)")
+
+
 def origem_de(*textos):
     t = sem_acento(" ".join(x or "" for x in textos))
-    if re.search(r"judicial|vara |penhor|execucao fiscal|trabalhista", t):
+    if re.search(r"judicial|\bvara\b|penhor|execucao fiscal|trabalhista|tribunal", t):
         return "judicial"
-    if re.search(r"financ|consorcio|alienacao fiduciaria|banco|bank|credito|credit|aymore|safra|bradesco|itau|santander|\bbv\b|\bpan\b|omni|capital s|leasing|retomad", t):
+    if re.search(r"financ|consorcio|alienacao fiduciaria|busca e apreensao|retomad|leasing|credito|" + BANCOS, t):
         return "financeira"
-    if re.search(r"segur|sinistr|colisao|enchente|roubo|furto|indeniza", t):
+    if re.search(r"seguradora|seguros|companhia de seguro|sinistr|indeniza|colisao|enchente|alagamento|recuperado de (?:roubo|furto)", t):
         return "seguradora"
-    if re.search(r"locadora|frota|localiza|movida|unidas|rent", t):
+    if re.search(r"locadora|\bfrota\b|localiza|movida|unidas|\brent\b|rent a car", t):
         return "locadora"
-    if re.search(r"detran|\bprf\b|apreen|patio|remocao|rodoviaria|prefeitura|municipio|transito", t):
+    if re.search(r"detran|\bprf\b|\bpf\b|apreendid|apreensao|removid|rodoviaria|prefeitura|municipio|transito|policia|der-|\bder\b", t):
         return "apreensao"
     return "outros"
 

@@ -1,14 +1,14 @@
 """Favareto Leilões (Curitiba/PR) — páginas HTML simples, uma por edital."""
 import re
 from bs4 import BeautifulSoup
-from comum import sessao, pausa, num_br, ano_modelo, data_br, categoria, origem_de, monta_de, lote
+from comum import checar, sessao, pausa, num_br, ano_modelo, data_br, categoria, origem_de, monta_de, lote
 
 BASE = "https://www.favaretoleiloes.com.br"
 
 
 def coletar():
     s = sessao()
-    home = s.get(BASE + "/", timeout=30)
+    home = checar(s.get(BASE + "/", timeout=30))
     home.encoding = home.apparent_encoding or "latin-1"
     html = home.text
     ids = list(dict.fromkeys(re.findall(r"/edital/(\d+)", html)))
@@ -19,7 +19,7 @@ def coletar():
     for i, eid in enumerate(ids):
         pausa(1.5)
         url = f"{BASE}/edital/{eid}/"
-        r = s.get(url, timeout=30)
+        r = checar(s.get(url, timeout=30))
         r.encoding = r.apparent_encoding or "latin-1"
         soup = BeautifulSoup(r.text, "html.parser")
         if i < len(datas):

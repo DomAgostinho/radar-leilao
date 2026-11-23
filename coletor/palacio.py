@@ -2,7 +2,7 @@
 import re
 import random
 from bs4 import BeautifulSoup
-from comum import sessao, pausa, num_br, ano_modelo, data_br, categoria, origem_de, monta_de, lote, sem_acento
+from comum import checar, sessao, pausa, num_br, ano_modelo, data_br, categoria, origem_de, monta_de, lote, sem_acento
 
 BASE = "https://www.palaciodosleiloes.com.br/site/"
 CIDADE_UF = {"juatuba": "MG", "cajamar": "SP", "betim": "MG", "contagem": "MG", "belo horizonte": "MG", "simoes filho": "BA", "catalao": "GO"}
@@ -16,7 +16,7 @@ def texto(el):
 
 def coletar():
     s = sessao()
-    home = s.get(BASE, timeout=30)
+    home = checar(s.get(BASE, timeout=30))
     home.encoding = "cp1252"
     soup = BeautifulSoup(home.text, "html.parser")
     leiloes = {}
