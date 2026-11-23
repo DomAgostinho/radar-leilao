@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from comum import BRT  # noqa: E402
-import favareto, kuss, copart, superbid, palacio  # noqa: E402
+import favareto, kuss, copart, superbid, palacio, fipe  # noqa: E402
 
 FONTES = {
     "favareto": ("Favareto Leilões", favareto.coletar),
@@ -73,6 +73,16 @@ def main():
             pass
         finais.append(l)
     finais.sort(key=lambda l: l.get("encerra") or "9999")
+
+    # FIPE: primeiro os carros da aba Semana (financeira / pequena monta), depois os que encerram antes
+    def prioridade(l):
+        semana = l.get("origem") == "financeira" or l.get("monta") == "pequena"
+        return (0 if semana else 1, l.get("encerra") or "9999")
+    try:
+        fipe.aplicar(finais, prioridade)
+    except Exception as e:
+        print("[ERRO] fipe:", e)
+        traceback.print_exc()
 
     (SAIDA / "lotes.json").write_text(json.dumps({"atualizado": agora.isoformat(), "lotes": finais}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     (SAIDA / "status.json").write_text(json.dumps({"atualizado": agora.isoformat(), "fontes": status}, ensure_ascii=False, indent=1), encoding="utf-8")
