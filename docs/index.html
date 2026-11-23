@@ -48,7 +48,7 @@ input,select{font:16px Barlow,sans-serif;color:var(--ink);background:var(--field
 .lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:10px}
 .lot{display:grid;grid-template-columns:112px minmax(0,1fr);gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
 .lot:hover{border-color:var(--blue2)}
-.ft{width:112px;height:96px;border-radius:8px;background:var(--soft) center/cover no-repeat;display:grid;place-items:center;color:var(--mute);font-size:12px}
+.ft{width:112px;height:96px;object-fit:cover;border-radius:8px;background:var(--soft) center/cover no-repeat;display:grid;place-items:center;color:var(--mute);font-size:12px}
 .lot h3{font-size:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .sub{font-size:13px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
@@ -154,6 +154,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 <script>
 {
 const $=id=>document.getElementById(id);
+/* alguns leiloeiros recusam muitas fotos ao mesmo tempo: tenta de novo, com intervalo */
+window.fotoErro=img=>{const n=+(img.dataset.n||0);if(n>=3){img.replaceWith(Object.assign(document.createElement('span'),{className:'ft',textContent:'sem foto'}));return}
+  img.dataset.n=n+1;setTimeout(()=>{img.src=img.src.split('?')[0]+'?t='+n+Date.now()},800+Math.random()*2500*(n+1))};
 const UFS=['PR','SC','SP','RS','MG','RJ','ES'];
 const ORIG={financeira:'Financeira',seguradora:'Seguradora',locadora:'Locadora',judicial:'Judicial',apreensao:'Apreensão',outros:'Outros'};
 const COND={sem:'Sem sinistro',pequena:'Pequena monta',media:'Média monta',sinistro:'Sinistro sem detalhe',grande:'Grande monta / sucata'};
@@ -197,7 +200,7 @@ function card(l){
   if(l.origem==='financeira')tg.push('<span class="t fin">Financeira</span>');else if(l.origem==='judicial')tg.push('<span class="t jud">Judicial</span>');else if(l.origem)tg.push(`<span class="t">${ORIG[l.origem]||''}</span>`);
   if(l.monta&&l.monta!=='sem')tg.push(`<span class="t ${TAGC[l.monta]||''}">${COND[l.monta].split(' /')[0]}</span>`);
   return `<button class="lot" data-id="${esc(l.id)}">
-  <span class="ft" style="${l.foto?`background-image:url('${esc(l.foto)}')`:''}">${l.foto?'':'sem foto'}</span>
+  ${l.foto?`<img class="ft" loading="lazy" referrerpolicy="no-referrer" alt="" src="${esc(l.foto)}" onerror="fotoErro(this)">`:'<span class="ft">sem foto</span>'}
   <span><h3>${esc(nome(l))}${l.ano?' · '+l.ano:''}</h3>
   <div class="sub">${esc(l.cidade||'')}${l.uf?'/'+l.uf:''} · ${esc(l.leiloeiro)}</div>
   <div class="sub">${l.encerra?'Encerra '+dataCurta(l.encerra):'Data no edital'}</div>
